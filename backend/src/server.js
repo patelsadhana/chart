@@ -12,8 +12,25 @@ const __dirname = path.resolve();
 
 const PORT = ENV.PORT || 3000;
 
+const allowedOrigins = [
+  ENV.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+].filter(Boolean);
+
+const corsOptions = {
+  origin: (incomingOrigin, callback) => {
+    if (!incomingOrigin || allowedOrigins.includes(incomingOrigin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
 app.use(express.json({ limit: "5mb" })); // req.body
-app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
